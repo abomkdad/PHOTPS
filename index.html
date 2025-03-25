@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 إدخال الطلبات</title>
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+            .then(registration => {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(error => {
+                console.error('Service Worker registration failed:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h2>📦 إدخال الطلبات</h2>
+    <div>
+        <select id="categoryFilter" onchange="searchProducts()">
+            <option value="">كل الفئات</option>
+        </select>
+        <input type="text" id="searchInput" placeholder="🔍 البحث عن منتج..." onkeyup="searchProducts()">
+        <div id="productList"></div>
+    </div>
+
+    <div>
+        <h3>🛒 عربة التسوق</h3>
+        <div id="cartItems"></div>
+        <p id="totalWithTax">السعر بعد الضريبة: 0₪</p>
+        <button onclick="sendOrder()">📲 إرسال الطلب عبر واتساب</button>
+        <button onclick="printOrder()">🖨️ طباعة الطلب</button>
+    </div>
+
+    <script>
+        const products = [
+            { name: "عطر نسائي A.104", price: 47, category: "عطور نسائية" },
+            { name: "عطر رجالي A.102", price: 47, category: "عطور رجالية" },
+            { name: "عطر يونيسكس Q.101", price: 47, category: "عطور يونيسكس" },
+            { name: "عطر نسائي B.205", price: 55, category: "عطور نسائية" },
+            { name: "عطر رجالي M.301", price: 65, category: "عطور رجالية" },
+            { name: "عطر يونيسكس U.401", price: 60, category: "عطور يونيسكس" }
+        ];
+    </script>
+</body>
+</html>
