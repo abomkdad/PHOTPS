@@ -51,7 +51,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: #e2e8f0;
+            background-color: white;
             padding: 15px;
             border-top: 3px solid #22c55e;
             max-height: 250px;
@@ -70,14 +70,22 @@
             border-radius: 0.5rem;
         }
         .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 2rem;
-            border: 1px solid #cbd5e0;
-            width: 85%;
-            border-radius: 0.5rem;
-            position: relative;
-            color: #334155;
+            background-color: #fefefe;
+            margin: 0 auto; /* إزالة الهوامش */
+            top: 0; /* تثبيت في الأعلى */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            border-radius: 10px;
+            position: fixed; /* تغيير الوضع إلى ثابت */
+            z-index: 10; /* التأكد من ظهورها فوق العناصر الأخرى */
+        }
+        @media (max-width: 640px) {
+            .modal-content {
+                width: 95%; /* عرض أكبر قليلاً على الشاشات الصغيرة جدًا */
+                margin-left: auto;
+                margin-right: auto;
+            }
         }
         #closeModal {
             color: #64748b;
