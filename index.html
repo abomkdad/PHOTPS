@@ -69,18 +69,27 @@
             margin-right: 1rem;
             border-radius: 0.5rem;
         }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
         .modal-content {
             background-color: #fefefe;
-            margin-top: 1%;
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: 0;
+            margin: 0 auto; /* إزالة الهوامش */
+            top: 0; /* تثبيت في الأعلى */
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
             border-radius: 10px;
-            position: fixed;
-            z-index: 10;
+            position: fixed; /* تغيير الوضع إلى ثابت */
+            z-index: 10; /* التأكد من ظهورها فوق العناصر الأخرى */
         }
         #closeModal {
             color: #64748b;
@@ -102,6 +111,7 @@
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
         }
+        /* إزالة CSS الخاص بالطباعة */
     </style>
 </head>
 <body>
@@ -152,7 +162,7 @@
                         ${product.image ? `<div style="width: 100%; height: 0; padding-bottom: 100%; position: relative; margin-bottom: 0.5rem; border-radius: 0.75rem; overflow: hidden;">
                             <img src="${product.image}" style="position: absolute; width: 100%; height: 100%; object-fit: cover;">
                         </div>` : ''}
-                        <div class="product-title">${product.name} - ${product.price.toFixed(2)} שקל</div>
+                        <div class="product-title">${product.name} - ${product.price.toFixed(2)} شيكل</div>
                         <div class="product-description">${product.description}</div>
                     </div>
                 `;
@@ -161,7 +171,7 @@
         }
 
         function openModal(name, price, image) {
-            console.log('openModal called'); // تم إضافة هذا السطر
+            console.log('openModal called');
             $('#modalContent').html(`
                 ${image ? `<img src="${image}" class="w-full max-h-48 object-contain rounded mb-4">` : ''}
                 <div class="text-lg font-bold mb-2">${name}</div>
@@ -267,7 +277,6 @@
                 y += lineHeight;
             });
 
-            y += 10;
             pdf.setFontSize(14);
             pdf.text(`Total: ${totalPrice.toFixed(2)} ILS`, margin, y);
             y += lineHeight;
