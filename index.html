@@ -64,6 +64,108 @@
             margin-right: 10px;
             border-radius: 8px;
         }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+            border-radius: 10px;
+            position: relative;
+        }
+        #closeModal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            border: none;
+            background: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #aaa;
+        }
+        #closeModal:hover,
+        #closeModal:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #confirmationMessage {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printOrderSection, #printOrderSection * {
+                visibility: visible;
+            }
+            #printOrderSection {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+            #printOrderSection table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            #printOrderSection th, #printOrderSection td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            #printOrderSection th {
+                background-color: #f2f2f2;
+            }
+            #printOrderSection img {
+                max-width: 50px;
+                max-height: 50px;
+                vertical-align: middle;
+            }
+        }
+        #printOrderSection {
+            display: none; /* Hidden by default */
+        }
+        #printOrderSection h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #printOrderSection table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #printOrderSection th, #printOrderSection td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        #printOrderSection th {
+            background-color: #f2f2f2;
+        }
+        #printOrderSection img {
+            max-width: 50px;
+            max-height: 50px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -76,10 +178,32 @@
 
         <div id="productModal" class="modal">
             <div class="modal-content">
+                <span id="closeModal">&times;</span>
                 <div id="modalContent"></div>
-                <button id="closeModal" class="mt-4 bg-red-500 text-white p-2 rounded">إغلاق</button>
             </div>
         </div>
+        <div id="confirmationMessage">تمت الإضافة إلى السلة!</div>
+    </div>
+
+    <div id="printOrderSection">
+        <h2>طلب الشراء</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>الصورة</th>
+                    <th>المنتج</th>
+                    <th>الكمية</th>
+                    <th>السعر الإجمالي</th>
+                </tr>
+            </thead>
+            <tbody id="printOrderTableBody">
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" id="printOrderTotals"></td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
 
     <script>
@@ -101,6 +225,8 @@
                 }
             });
             displayProducts(products);
+        }).fail(function() {
+            $('#productList').html('<div class="text-red-500 text-center">حدث خطأ أثناء تحميل المنتجات. يرجى المحاولة مرة أخرى لاحقًا.</div>');
         });
 
         function displayProducts(productsToShow) {
@@ -132,36 +258,66 @@
             selectedProducts.push({ name, price, image, quantity });
             $('#productModal').hide();
             displayCart();
+            // عرض رسالة التأكيد
+            $('#confirmationMessage').css('opacity', 1);
+            setTimeout(() => {
+                $('#confirmationMessage').css('opacity', 0);
+            }, 1500);
         }
 
         function displayCart() {
             $('#cartDisplay').empty();
+            let totalPrice = 0;
             selectedProducts.forEach((product, index) => {
+                const itemPrice = product.price * product.quantity;
+                totalPrice += itemPrice;
                 $('#cartDisplay').append(`
                     <div class="cart-item">
                         ${product.image ? `<img src="${product.image}">` : ''}
-                        <div>${product.name} - الكمية: ${product.quantity} - السعر: ${(product.price * product.quantity).toFixed(2)} شيكل</div>
+                        <div>${product.name} - الكمية: ${product.quantity} - السعر: ${itemPrice.toFixed(2)} شيكل</div>
                     </div>
                 `);
             });
-            $('#cartDisplay').append('<button id="whatsappButton" class="mt-4 bg-green-500 text-white p-2 rounded">📲 إرسال للواتساب</button>');
 
-            $('#whatsappButton').click(function() {
-                if (selectedProducts.length === 0) {
-                    alert('لم يتم اختيار أي منتجات.');
-                    return;
-                }
-                let message = 'قائمة الطلبات:\n';
-                selectedProducts.forEach(p => {
-                    message += `- ${p.name} - الكمية: ${p.quantity} - السعر: ${(p.price * p.quantity).toFixed(2)} شيكل\n`;
+            if (selectedProducts.length > 0) {
+                $('#cartDisplay').append(`<div class="mt-2 font-bold">الإجمالي: ${totalPrice.toFixed(2)} شيكل</div>`);
+                $('#cartDisplay').append('<button id="whatsappButton" class="mt-4 bg-green-500 text-white p-2 rounded">📲 إرسال للواتساب</button>');
+                $('#cartDisplay').append('<button id="printOrderButton" class="mt-4 ml-2 bg-blue-500 text-white p-2 rounded">🖨️ طباعة الطلب</button>');
+
+                $('#whatsappButton').click(function() {
+                    if (selectedProducts.length === 0) {
+                        alert('لم يتم اختيار أي منتجات.');
+                        return;
+                    }
+                    let message = 'قائمة الطلبات:\n';
+                    selectedProducts.forEach(p => {
+                        message += `- ${p.name} - الكمية: ${p.quantity} - السعر: ${(p.price * p.quantity).toFixed(2)} شيكل\n`;
+                    });
+                    const taxRate = 0.18;
+                    const taxAmount = totalPrice * taxRate;
+                    const grandTotal = totalPrice + taxAmount;
+                    message += `\nالإجمالي: ${totalPrice.toFixed(2)} شيكل`;
+                    message += `\nالضريبة (${(taxRate * 100).toFixed(0)}%): ${taxAmount.toFixed(2)} شيكل`;
+                    message += `\nالمجموع النهائي: ${grandTotal.toFixed(2)} شيكل`;
+                    const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                    window.open(whatsappURL, '_blank');
                 });
-                const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
-                window.open(whatsappURL, '_blank');
-            });
+
+                $('#printOrderButton').click(function() {
+                    printOrder(totalPrice);
+                });
+            }
         }
 
         $('#closeModal').click(function() {
             $('#productModal').hide();
+        });
+
+        // إغلاق النافذة المنبثقة بالنقر خارجها
+        $('#productModal').click(function(event) {
+            if (event.target == this) {
+                $('#productModal').hide();
+            }
         });
 
         $('#searchInput').on('input', function() {
@@ -170,6 +326,52 @@
             displayProducts(filteredProducts);
         });
 
+        function printOrder(totalPrice) {
+            const printOrderTableBody = $('#printOrderTableBody');
+            printOrderTableBody.empty();
+
+            console.log('Total Price Received by printOrder:', totalPrice); // إضافة هذا السطر
+
+            selectedProducts.forEach(product => {
+                const row = `
+                    <tr>
+                        <td>${product.image ? `<img src="${product.image}">` : ''}</td>
+                        <td>${product.name}</td>
+                        <td>${product.quantity}</td>
+                        <td>${(product.price * product.quantity).toFixed(2)} شيكل</td>
+                    </tr>
+                `;
+                printOrderTableBody.append(row);
+            });
+
+            const taxRate = 0.18; // نسبة الضريبة 18ce * taxRate;
+            const grandTotal = totalPrice + taxAmount;
+
+            const totalRow = `
+                <tr>
+                    <td colspan="3" class="font-bold text-right">الإجمالي:</td>
+                    <td class="font-bold">${totalPrice.toFixed(2)} شيكل</td>
+                </tr>
+            `;
+            const taxRow = `
+                <tr>
+                    <td colspan="3" class="font-bold text-right">الضريبة (${(taxRate * 100).toFixed(0)}%):</td>
+                    <td class="font-bold">${taxAmount.toFixed(2)} شيكل</td>
+                </tr>
+            `;
+            const grandTotalRow = `
+                <tr>
+                    <td colspan="3" class="font-bold text-right">المجموع النهائي:</td>
+                    <td class="font-bold">${grandTotal.toFixed(2)} شيكل</td>
+                </tr>
+            `;
+
+            $('#printOrderTableBody').append(totalRow);
+            $('#printOrderTableBody').append(taxRow);
+            $('#printOrderTableBody').append(grandTotalRow);
+
+            window.print();
+        }
     </script>
 </body>
 </html>
