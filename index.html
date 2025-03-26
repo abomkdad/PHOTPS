@@ -162,7 +162,7 @@
                         ${product.image ? `<div style="width: 100%; height: 0; padding-bottom: 100%; position: relative; margin-bottom: 0.5rem; border-radius: 0.75rem; overflow: hidden;">
                             <img src="${product.image}" style="position: absolute; width: 100%; height: 100%; object-fit: cover;">
                         </div>` : ''}
-                        <div class="product-title">${product.name} - ${product.price.toFixed(2)} شيكل</div>
+                        <div class="product-title">${product.name} - ${product.price.toFixed(2)} שקל</div>
                         <div class="product-description">${product.description}</div>
                     </div>
                 `;
@@ -221,7 +221,9 @@
                     }
                     let message = 'רשימת הזמנה:\n';
                     selectedProducts.forEach(p => {
-                        message += `- ${p.name} - כמות: ${p.quantity} - מחיר: ${(p.price * p.quantity).toFixed(2)} שקל\n`;
+                        const productDetails = products.find(prod => prod.name === p.name);
+                        const description = productDetails ? ` - ${productDetails.description}` : '';
+                        message += `- ${p.name}${description} - כמות: ${p.quantity} - מחיר: ${(p.price * p.quantity).toFixed(2)} שקל\n`;
                     });
                     const taxRate = 0.18;
                     const taxAmount = totalPrice * taxRate;
@@ -277,6 +279,7 @@
                 y += lineHeight;
             });
 
+            y += 10;
             pdf.setFontSize(14);
             pdf.text(`Total: ${totalPrice.toFixed(2)} ILS`, margin, y);
             y += lineHeight;
